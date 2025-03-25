@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YELLOW MAX POOL: Binary Options Trading Bot</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>YELLOW MAX POOL</h1>
+        <div class="row">
+            <div class="col-6">
+                <p>Server Time: <span id="server-time">Loading...</span></p>
+            </div>
+            <div class="col-6">
+                <p>Online: <span id="online-time">00 00:00m 00s</span></p>
+            </div>
+        </div>
+
+        <!-- Account Section -->
+        <div id="account-section" class="section">
+            <h2>Account</h2>
+            <div class="row">
+                <div class="col-6">
+                    <p>API Token: <input type="password" id="api-token" placeholder="Enter your Binary.com API token"></p>
+                    <div class="row">
+                        <div class="col-4">
+                            <button id="login-btn">Login</button>
+                        </div>
+                        <div class="col-4">
+                            <button id="logout-btn" disabled>Logout</button>
+                        </div>
+                        <div class="col-4">
+                            <button id="exit-btn">Exit</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <p>Start Balance: <span id="start-balance" class="stat-value">0.00</span></p>
+                    <p>Current Balance: <span id="current-balance" class="stat-value">0.00</span></p>
+                    <p>Profit/Loss: <span id="profit-loss" class="stat-value">0.00</span></p>
+                    <p>Trade Stats: <span id="trade-stats" class="stat-value">0 Wins / 0 Losses</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Configuration -->
+        <div id="trade-config" class="section">
+            <h2>Trade Configuration</h2>
+            <div class="row">
+                <div class="col-6">
+                    <p>Contract Type: 
+                        <select id="contract-type">
+                            <option value="matches">Matches</option>
+                            <option value="differs">Digit Differs</option>
+                            <option value="over_under">Over/Under</option>
+                            <option value="even_odd">Even/Odd</option>
+                        </select>
+                    </p>
+                    <p>Stake Amount: <input type="number" id="stake-amount" value="10" min="1" step="1"></p>
+                    <p>Target Profit: <input type="number" id="target-profit" value="50" min="1" step="1"></p>
+                </div>
+                <div class="col-6">
+                    <p>Stop Loss: <input type="number" id="stop-loss" value="50" min="1" step="1"></p>
+                    <p>Martingale Start After (r) Exec: <input type="number" id="martingale-start" value="1" min="1" step="1"></p>
+                    <p>Maximum Martingale Level: <input type="number" id="max-martingale" value="5" min="1" step="1"></p>
+                </div>
+            </div>
+            <button id="execute-trade-btn" disabled>Execute Trade</button>
+        </div>
+
+        <!-- Market Selection -->
+        <div id="market-section" class="section">
+            <h2>MARKET</h2>
+            <div class="row">
+                <div class="col-12">
+                    <button class="market-btn" data-market="R_10">R_10</button>
+                    <button class="market-btn" data-market="R_25">R_25</button>
+                    <button class="market-btn" data-market="R_50">R_50</button>
+                    <button class="market-btn" data-market="R_75">R_75</button>
+                    <button class="market-btn" data-market="R_100">R_100</button>
+                    <button class="market-btn" data-market="RDBEAR">RDBEAR</button>
+                    <button class="market-btn" data-market="RDBULL">RDBULL</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Digit Analysis -->
+            <div class="col-6">
+                <div id="digit-analysis" class="section">
+                    <h2>DIGIT INDICATOR</h2>
+                    <p><span id="digit-indicator">- - | - | - | - | - | - | -</span></p>
+                    <h2>DIGIT COUNTER</h2>
+                    <p><span id="digit-counter">- - | - | - | - | - | - | -</span></p>
+                    
+                    <!-- Digit Frequency Chart -->
+                    <div id="digit-frequency-chart" class="chart-container"></div>
+                    
+                    <!-- ML Prediction Section -->
+                    <h2>ML PREDICTIONS</h2>
+                    <div class="row">
+                        <div class="col-6">
+                            <p>Best Match: <span id="best-match" class="stat-value">-</span></p>
+                            <p>Best Differ: <span id="best-differ" class="stat-value">-</span></p>
+                        </div>
+                        <div class="col-6">
+                            <p>Confidence: <span id="ml-confidence" class="stat-value">-</span></p>
+                            <p>Next Prediction: <span id="next-prediction" class="stat-value">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trade History -->
+            <div class="col-6">
+                <div id="trade-history" class="section">
+                    <h2>LAST DIGIT HISTORY (COUNTER 100 TICKS)</h2>
+                    <ul id="last-digit-history">
+                        <!-- This will be populated by JavaScript -->
+                    </ul>
+                    
+                    <!-- Last Digits Trend Chart -->
+                    <div id="last-digits-chart" class="chart-container"></div>
+                    
+                    <!-- Probability Chart -->
+                    <div id="probability-chart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause/Break -->
+        <div id="pause-section" class="section">
+            <h2>Trading Controls</h2>
+            <div class="row">
+                <div class="col-6">
+                    <button id="pause-btn">Pause</button>
+                </div>
+                <div class="col-6">
+                    <button id="break-btn">Break After Win</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backtesting Section -->
+        <div id="backtest-section" class="section">
+            <h2>Strategy Backtesting</h2>
+            <div class="row">
+                <div class="col-6">
+                    <h3>Configuration</h3>
+                    <p>Contract Type: 
+                        <select id="backtest-contract-type">
+                            <option value="matches">Matches</option>
+                            <option value="differs">Digit Differs</option>
+                            <option value="over_under">Over/Under</option>
+                            <option value="even_odd">Even/Odd</option>
+                        </select>
+                    </p>
+                    <p>Stake Amount: <input type="number" id="backtest-stake-amount" value="10" min="1" step="1"></p>
+                    <p>Use Martingale: <input type="checkbox" id="backtest-martingale-enabled"></p>
+                    <p>Martingale Start: <input type="number" id="backtest-martingale-start" value="1" min="1" step="1"></p>
+                    <p>Max Martingale Level: <input type="number" id="backtest-max-martingale" value="5" min="1" step="1"></p>
+                    <p>Min Confidence: <input type="number" id="backtest-min-confidence" value="0.6" min="0.1" max="1" step="0.1"></p>
+                    <p>Window Size: <input type="number" id="backtest-window-size" value="20" min="5" step="1"></p>
+                    <p>Market: 
+                        <select id="backtest-market">
+                            <option value="R_10">R_10</option>
+                            <option value="R_25">R_25</option>
+                            <option value="R_50">R_50</option>
+                            <option value="R_75">R_75</option>
+                            <option value="R_100" selected>R_100</option>
+                            <option value="RDBEAR">RDBEAR</option>
+                            <option value="RDBULL">RDBULL</option>
+                        </select>
+                    </p>
+                    <p>Data Points: <input type="number" id="backtest-data-points" value="1000" min="100" step="100"></p>
+                    <button id="run-backtest-btn">Run Backtest</button>
+                </div>
+                <div class="col-6">
+                    <h3>Results Summary</h3>
+                    <div id="backtest-summary" class="backtest-results">
+                        <p>Total Trades: <span id="backtest-total-trades" class="stat-value">0</span></p>
+                        <p>Win Rate: <span id="backtest-win-rate" class="stat-value">0%</span></p>
+                        <p>Profit/Loss: <span id="backtest-profit-loss" class="stat-value">0.00</span></p>
+                        <p>Max Consecutive Wins: <span id="backtest-max-cons-wins" class="stat-value">0</span></p>
+                        <p>Max Consecutive Losses: <span id="backtest-max-cons-losses" class="stat-value">0</span></p>
+                        <p>Max Drawdown: <span id="backtest-max-drawdown" class="stat-value">0.00</span></p>
+                        <p>Profit Factor: <span id="backtest-profit-factor" class="stat-value">0.00</span></p>
+                        <p>Average Win: <span id="backtest-avg-win" class="stat-value">0.00</span></p>
+                        <p>Average Loss: <span id="backtest-avg-loss" class="stat-value">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Equity Curve Chart -->
+            <div id="equity-curve-chart" class="chart-container"></div>
+            
+            <!-- Detailed Trade Results -->
+            <h3>Trade Details</h3>
+            <div id="backtest-trade-details" class="backtest-details">
+                <table id="backtest-trades-table">
+                    <thead>
+                        <tr>
+                            <th>Trade #</th>
+                            <th>Prediction</th>
+                            <th>Actual</th>
+                            <th>Result</th>
+                            <th>Stake</th>
+                            <th>Profit/Loss</th>
+                            <th>Balance</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backtest-trades-body">
+                        <!-- This will be populated with JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
