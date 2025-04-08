@@ -1,0 +1,10 @@
+name = "trading-bot"
+compatibility_date = "2024-03-20"
+main = "src/worker.js"
+assets = "./static"
+
+[build]
+upload.format = "service-worker"
+
+[site]
+bucket = "./static"
